@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { mockBookings } from '../../data/mockData';
-import { 
-  Calendar, 
-  Clock, 
-  IndianRupee, 
-  Star, 
+import { getWorkerBookings, getMyWorkerProfile } from '../../services';
+import type { Booking } from '../../types';
+import {
+  Calendar,
+  Clock,
+  IndianRupee,
+  Star,
   CheckCircle,
   ToggleLeft,
   ToggleRight
@@ -17,12 +18,49 @@ import {
 export const WorkerDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [isAvailable, setIsAvailable] = React.useState(true);
-  
-  const todayJobs = mockBookings.filter(b => b.status === 'accepted' || b.status === 'in_progress');
-  const pendingRequests = mockBookings.filter(b => b.status === 'pending');
-  const completedJobs = mockBookings.filter(b => b.status === 'completed');
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [workerRating, setWorkerRating] = useState(4.8);
+  const [workerReviewCount, setWorkerReviewCount] = useState(127);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [bookingsData, workerData] = await Promise.all([
+          getWorkerBookings(),
+          getMyWorkerProfile()
+        ]);
+        setBookings(bookingsData.bookings || []);
+        if (workerData.worker) {
+          setWorkerRating(workerData.worker.rating || 4.8);
+          setWorkerReviewCount(workerData.worker.reviewCount || 127);
+          setIsAvailable(workerData.worker.available ?? true);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const todayJobs = bookings.filter(b => b.status === 'accepted' || b.status === 'in_progress');
+  const pendingRequests = bookings.filter(b => b.status === 'pending');
+  const completedJobs = bookings.filter(b => b.status === 'completed');
   const totalEarnings = completedJobs.reduce((sum, b) => sum + b.estimatedPrice, 0);
-  
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar userRole="worker" userName="Rajesh Kumar" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar userRole="worker" userName="Rajesh Kumar" />
@@ -68,8 +106,8 @@ export const WorkerDashboard: React.FC = () => {
               <Star className="w-8 h-8 text-yellow-500" />
               <span className="text-sm text-gray-500">Rating</span>
             </div>
-            <p className="text-3xl font-bold">4.8</p>
-            <p className="text-gray-600">127 Reviews</p>
+            <p className="text-3xl font-bold">{workerRating}</p>
+            <p className="text-gray-600">{workerReviewCount} Reviews</p>
           </Card>
         </div>
         

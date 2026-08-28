@@ -1,26 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatusBadge } from '../../components/StatusBadge';
-import { mockBookings } from '../../data/mockData';
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
+import { getWorkerBookingById } from '../../services';
+import type { Booking } from '../../types';
+import {
+  Calendar,
+  Clock,
+  MapPin,
   IndianRupee,
   User,
-  Phone,
-  Mail
+  Phone
 } from 'lucide-react';
 
 export const WorkerJobDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
-  const booking = mockBookings.find(b => b.id === id);
-  
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBooking = async () => {
+      if (!id) return;
+      try {
+        const data = await getWorkerBookingById(id);
+        setBooking(data.booking || null);
+      } catch (error) {
+        console.error('Failed to fetch booking:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBooking();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar userRole="worker" userName="Rajesh Kumar" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <p className="text-gray-600">Loading job details...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!booking) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -31,13 +57,7 @@ export const WorkerJobDetails: React.FC = () => {
       </div>
     );
   }
-  
-  const mockCustomer = {
-    name: 'Rahul Sharma',
-    phone: '+91 98765 43210',
-    email: 'rahul.sharma@email.com'
-  };
-  
+
   const handleAction = () => {
     if (booking.status === 'pending') {
       alert('Job accepted!');
@@ -143,22 +163,15 @@ export const WorkerJobDetails: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <User className="w-5 h-5 text-gray-500" />
                   <div>
-                    <p className="text-sm text-gray-600">Name</p>
-                    <p className="font-medium">{mockCustomer.name}</p>
+                    <p className="text-sm text-gray-600">Customer ID</p>
+                    <p className="font-medium">{booking.customerId}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="w-5 h-5 text-gray-500" />
                   <div>
-                    <p className="text-sm text-gray-600">Phone</p>
-                    <p className="font-medium">{mockCustomer.phone}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium">{mockCustomer.email}</p>
+                    <p className="text-sm text-gray-600">Contact</p>
+                    <p className="font-medium">Available after accepting job</p>
                   </div>
                 </div>
               </div>

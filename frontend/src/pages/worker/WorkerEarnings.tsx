@@ -1,14 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '../../components/Navbar';
 import { Card } from '../../components/Card';
-import { mockBookings } from '../../data/mockData';
+import { getWorkerBookings } from '../../services';
+import type { Booking } from '../../types';
 import { IndianRupee, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
 
 export const WorkerEarnings: React.FC = () => {
-  const completedBookings = mockBookings.filter(b => b.status === 'completed');
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const data = await getWorkerBookings();
+        setBookings(data.bookings || []);
+      } catch (error) {
+        console.error('Failed to fetch bookings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
+
+  const completedBookings = bookings.filter(b => b.status === 'completed');
   const totalEarnings = completedBookings.reduce((sum, b) => sum + b.estimatedPrice, 0);
   const thisMonthEarnings = totalEarnings * 0.7;
-  
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar userRole="worker" userName="Rajesh Kumar" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <p className="text-gray-600">Loading earnings...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar userRole="worker" userName="Rajesh Kumar" />

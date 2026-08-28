@@ -1,23 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
 import { ServiceCard } from '../../components/ServiceCard';
 import { WorkerCard } from '../../components/WorkerCard';
 import { BookingCard } from '../../components/BookingCard';
-import { mockServices, mockWorkers, mockBookings } from '../../data/mockData';
+import { getServices, getWorkers, getCustomerBookings } from '../../services';
+import type { Service, Worker, Booking } from '../../types';
 import { Search, Plus } from 'lucide-react';
 
 export const CustomerDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [services, setServices] = useState<Service[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [servicesData, workersData, bookingsData] = await Promise.all([
+          getServices(),
+          getWorkers(),
+          getCustomerBookings()
+        ]);
+        setServices(servicesData.services || []);
+        setWorkers(workersData.workers || []);
+        setBookings(bookingsData.bookings || []);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const recentBookings = bookings.slice(0, 3);
+  const nearbyWorkers = workers.slice(0, 4);
   
-  const recentBookings = mockBookings.slice(0, 3);
-  const nearbyWorkers = mockWorkers.slice(0, 4);
-  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar userRole="customer" userName="Rahul Sharma" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar userRole="customer" userName="Rahul Sharma" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -50,7 +86,7 @@ export const CustomerDashboard: React.FC = () => {
             </Button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {mockServices.slice(0, 4).map((service) => (
+            {services.slice(0, 4).map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))}
           </div>
@@ -79,11 +115,11 @@ export const CustomerDashboard: React.FC = () => {
           </div>
           <div className="space-y-4">
             {recentBookings.map((booking) => {
-              const worker = mockWorkers.find(w => w.id === booking.workerId);
+              const worker = workers.find(w => w.id === booking.workerId);
               return (
-                <BookingCard 
-                  key={booking.id} 
-                  booking={booking} 
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
                   workerName={worker?.name}
                 />
               );
