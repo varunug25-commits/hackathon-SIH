@@ -9,6 +9,7 @@ import {
   removeWorkerService,
   updateWorkerAvailability,
 } from '../services/workerService';
+import { getNearbyWorkers } from '../services/nearbyWorkerService';
 import { supabase } from '../config/supabase';
 
 // ── Public endpoints ──
@@ -57,6 +58,72 @@ export const getWorkerDetail = async (
 
     res.status(200).json({ success: true, data: worker });
   } catch (err) {
+    next(err);
+  }
+};
+
+export const getNearbyWorkersList = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { latitude, longitude, radius_km, service_id, available } = req.query;
+
+    // Validate required parameters
+    if (!latitude || !longitude) {
+      res.status(400).json({
+        success: false,
+        message: 'latitude and longitude are required',
+      });
+      return;
+    }
+
+    const lat = parseFloat(latitude as string);
+    const lon = parseFloat(longitude as string);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      res.status(400).json({
+        success: false,
+        message: 'latitude and longitude must be valid numbers',
+      });
+      return;
+    }
+
+    const filters: any = {
+      latitude: lat,
+      longitude: lon,
+    };
+
+    if (radius_km !== undefined) {
+      const radius = parseFloat(radius_km as string);
+      if (isNaN(radius)) {
+        res.status(400).json({
+          success: false,
+          message: 'radius_km must be a valid number',
+        });
+        return;
+      }
+      filters.radius_km = radius;
+    }
+
+    if (service_id !== undefined) {
+      filters.service_id = service_id as string;
+    }
+
+    if (available !== undefined) {
+      filters.available = available === 'true';
+    }
+
+    const workers = await getNearbyWorkers(filters);
+    res.status(200).json({ success: true, data: workers });
+  } catch (err: any) {
+    if (err.message?.includes('Invalid latitude') || 
+        err.message?.includes('Invalid longitude') || 
+        err.message?.includes('Invalid radius')) {
+      res.status(400).json({ success: false, message: err.message });
+      return;
+    }
     next(err);
   }
 };

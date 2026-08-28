@@ -4,6 +4,7 @@ import { requireWorker } from '../middleware/requireWorker';
 import {
   listWorkers,
   getWorkerDetail,
+  getNearbyWorkersList,
   getMyWorkerProfile,
   updateMyWorkerProfile,
   addMyService,
@@ -22,6 +23,7 @@ router.patch('/me/availability', requireAuth, requireWorker, updateMyAvailabilit
 
 // ── Public routes ──
 router.get('/', listWorkers);
+router.get('/nearby', getNearbyWorkersList);
 router.get('/:id', getWorkerDetail);
 
 export default router;
