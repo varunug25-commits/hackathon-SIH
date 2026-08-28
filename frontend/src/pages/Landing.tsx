@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { ServiceCard } from '../components/ServiceCard';
-import { mockServices } from '../data/mockData';
-import { 
-  ShieldCheck, 
-  Users, 
-  Clock, 
-  Star, 
+import { getServices } from '../services';
+import type { Service } from '../types';
+import {
+  ShieldCheck,
+  Users,
+  Clock,
+  Star,
   CheckCircle,
   ArrowRight,
   Wrench
@@ -15,6 +16,22 @@ import {
 
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const data = await getServices();
+        setServices(data.services || []);
+      } catch (error) {
+        console.error('Failed to fetch services:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,9 +70,15 @@ export const Landing: React.FC = () => {
           Our Services
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {mockServices.map((service) => (
-            <ServiceCard key={service.id} service={service} />
-          ))}
+          {loading ? (
+            <p className="text-gray-600">Loading services...</p>
+          ) : services.length > 0 ? (
+            services.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))
+          ) : (
+            <p className="text-gray-600">No services available</p>
+          )}
         </div>
       </div>
       

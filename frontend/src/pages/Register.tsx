@@ -3,19 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
+import { register } from '../services';
 import type { UserRole } from '../types';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState<UserRole>('customer');
-  
+
   const [customerData, setCustomerData] = useState({
     name: '',
     email: '',
     phone: '',
     password: ''
   });
-  
+
   const [workerData, setWorkerData] = useState({
     name: '',
     email: '',
@@ -25,13 +26,45 @@ export const Register: React.FC = () => {
     location: '',
     password: ''
   });
-  
-  const handleRegister = (e: React.FormEvent) => {
+
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (role === 'customer') {
-      navigate('/customer');
-    } else {
-      navigate('/worker');
+    setError('');
+    setLoading(true);
+
+    try {
+      const data = role === 'customer'
+        ? {
+            full_name: customerData.name,
+            email: customerData.email,
+            phone: customerData.phone,
+            password: customerData.password,
+            role: role
+          }
+        : {
+            full_name: workerData.name,
+            email: workerData.email,
+            phone: workerData.phone,
+            password: workerData.password,
+            role: role
+          };
+
+      const response = await register(data);
+      localStorage.setItem('auth_token', response.access_token);
+      localStorage.setItem('user_role', role);
+
+      if (role === 'customer') {
+        navigate('/customer');
+      } else {
+        navigate('/worker');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -44,6 +77,11 @@ export const Register: React.FC = () => {
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-8">
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleRegister} className="space-y-6">
             <Select
               label="Register as"
@@ -146,8 +184,8 @@ export const Register: React.FC = () => {
               required
             />
             
-            <Button type="submit" className="w-full">
-              Register
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Registering...' : 'Register'}
             </Button>
           </form>
           

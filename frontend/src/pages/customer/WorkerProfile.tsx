@@ -1,25 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { mockWorkers, mockReviews } from '../../data/mockData';
-import { 
-  Star, 
-  MapPin, 
-  Clock, 
-  ShieldCheck, 
+import { getWorkerById, getWorkerReviews } from '../../services';
+import type { Worker, Review } from '../../types';
+import {
+  Star,
+  MapPin,
+  Clock,
+  ShieldCheck,
   CheckCircle,
-  IndianRupee 
+  IndianRupee
 } from 'lucide-react';
 
 export const WorkerProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  const [worker, setWorker] = useState<Worker | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) return;
+      try {
+        const [workerData, reviewsData] = await Promise.all([
+          getWorkerById(id),
+          getWorkerReviews(id)
+        ]);
+        setWorker(workerData.worker || null);
+        setReviews(reviewsData.reviews || []);
+      } catch (error) {
+        console.error('Failed to fetch worker data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [id]);
   
-  const worker = mockWorkers.find(w => w.id === id);
-  const workerReviews = mockReviews.filter(r => r.workerId === id);
-  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar userRole="customer" userName="Rahul Sharma" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <p className="text-gray-600">Loading worker profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!worker) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -118,9 +150,9 @@ export const WorkerProfile: React.FC = () => {
             
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Reviews</h2>
-              {workerReviews.length > 0 ? (
+              {reviews.length > 0 ? (
                 <div className="space-y-4">
-                  {workerReviews.map((review) => (
+                  {reviews.map((review) => (
                     <div key={review.id} className="border-b pb-4 last:border-b-0">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-1 text-yellow-600">

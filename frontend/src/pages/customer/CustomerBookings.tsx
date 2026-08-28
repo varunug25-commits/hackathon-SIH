@@ -1,14 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { BookingCard } from '../../components/BookingCard';
-import { mockBookings, mockWorkers } from '../../data/mockData';
-import type { BookingStatus } from '../../types';
+import { getCustomerBookings } from '../../services';
+import type { BookingStatus, Booking } from '../../types';
 
 export const CustomerBookings: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<BookingStatus | 'all'>('all');
-  
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const data = await getCustomerBookings();
+        setBookings(data.bookings || []);
+      } catch (error) {
+        console.error('Failed to fetch bookings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
+
   const tabs: { value: BookingStatus | 'all'; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'pending', label: 'Pending' },
@@ -17,10 +33,10 @@ export const CustomerBookings: React.FC = () => {
     { value: 'completed', label: 'Completed' },
     { value: 'cancelled', label: 'Cancelled' }
   ];
-  
-  const filteredBookings = activeTab === 'all' 
-    ? mockBookings 
-    : mockBookings.filter(b => b.status === activeTab);
+
+  const filteredBookings = activeTab === 'all'
+    ? bookings
+    : bookings.filter(b => b.status === activeTab);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,18 +61,17 @@ export const CustomerBookings: React.FC = () => {
           ))}
         </div>
         
-        {filteredBookings.length > 0 ? (
+        {loading ? (
+          <p className="text-gray-600">Loading bookings...</p>
+        ) : filteredBookings.length > 0 ? (
           <div className="space-y-4">
-            {filteredBookings.map((booking) => {
-              const worker = mockWorkers.find(w => w.id === booking.workerId);
-              return (
-                <BookingCard 
-                  key={booking.id} 
-                  booking={booking} 
-                  workerName={worker?.name}
-                />
-              );
-            })}
+            {filteredBookings.map((booking) => (
+              <BookingCard
+                key={booking.id}
+                booking={booking}
+                workerName={booking.workerId || 'Unknown'}
+              />
+            ))}
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">

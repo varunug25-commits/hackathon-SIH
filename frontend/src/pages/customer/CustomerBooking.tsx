@@ -5,23 +5,47 @@ import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Textarea } from '../../components/Textarea';
 import { Select } from '../../components/Select';
-import { mockWorkers, mockServices } from '../../data/mockData';
+import { getWorkerById, getServices } from '../../services';
+import type { Worker, Service } from '../../types';
 import { Calendar, Clock, MapPin, IndianRupee } from 'lucide-react';
 
 export const CustomerBooking: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const workerId = searchParams.get('workerId');
-  
+
   const [selectedService, setSelectedService] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('Andheri East, Mumbai');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [urgency, setUrgency] = useState('medium');
-  
-  const worker = mockWorkers.find(w => w.id === workerId);
-  const service = mockServices.find(s => s.id === selectedService);
+  const [worker, setWorker] = useState<Worker | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [servicesData] = await Promise.all([
+          getServices()
+        ]);
+        setServices(servicesData.services || []);
+
+        if (workerId) {
+          const workerData = await getWorkerById(workerId);
+          setWorker(workerData.worker || null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [workerId]);
+
+  const service = services.find(s => s.id === selectedService);
   
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -35,10 +59,21 @@ export const CustomerBooking: React.FC = () => {
     navigate('/customer/booking-confirmation');
   };
   
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar userRole="customer" userName="Rahul Sharma" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar userRole="customer" userName="Rahul Sharma" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <button
@@ -59,7 +94,7 @@ export const CustomerBooking: React.FC = () => {
                 
                 <Select
                   label="Select Service"
-                  options={mockServices.map(s => ({ value: s.id, label: s.name }))}
+                  options={services.map(s => ({ value: s.id, label: s.name }))}
                   value={selectedService}
                   onChange={(e) => setSelectedService(e.target.value)}
                   required

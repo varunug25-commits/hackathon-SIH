@@ -1,17 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatusBadge } from '../../components/StatusBadge';
-import { mockBookings } from '../../data/mockData';
-import type { BookingStatus } from '../../types';
+import { getWorkerBookings } from '../../services';
+import type { BookingStatus, Booking } from '../../types';
 import { Calendar, Clock, MapPin, IndianRupee } from 'lucide-react';
 
 export const WorkerJobs: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<BookingStatus | 'all'>('all');
-  
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const data = await getWorkerBookings();
+        setBookings(data.bookings || []);
+      } catch (error) {
+        console.error('Failed to fetch bookings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
+
   const tabs: { value: BookingStatus | 'all'; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'pending', label: 'Pending' },
@@ -19,10 +35,10 @@ export const WorkerJobs: React.FC = () => {
     { value: 'in_progress', label: 'In Progress' },
     { value: 'completed', label: 'Completed' }
   ];
-  
-  const filteredBookings = activeTab === 'all' 
-    ? mockBookings 
-    : mockBookings.filter(b => b.status === activeTab);
+
+  const filteredBookings = activeTab === 'all'
+    ? bookings
+    : bookings.filter(b => b.status === activeTab);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -47,7 +63,9 @@ export const WorkerJobs: React.FC = () => {
           ))}
         </div>
         
-        {filteredBookings.length > 0 ? (
+        {loading ? (
+          <p className="text-gray-600">Loading jobs...</p>
+        ) : filteredBookings.length > 0 ? (
           <div className="space-y-4">
             {filteredBookings.map((booking) => (
               <Card key={booking.id} className="p-6">

@@ -1,14 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '../../components/Navbar';
 import { WorkerCard } from '../../components/WorkerCard';
 import { Select } from '../../components/Select';
-import { mockWorkers } from '../../data/mockData';
+import { getWorkers } from '../../services';
+import type { Worker } from '../../types';
 import { Filter } from 'lucide-react';
 
 export const CustomerWorkers: React.FC = () => {
   const [sortBy, setSortBy] = useState('rating');
-  
-  const sortedWorkers = [...mockWorkers].sort((a, b) => {
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWorkers = async () => {
+      try {
+        const data = await getWorkers();
+        setWorkers(data.workers || []);
+      } catch (error) {
+        console.error('Failed to fetch workers:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWorkers();
+  }, []);
+
+  const sortedWorkers = [...workers].sort((a, b) => {
     if (sortBy === 'rating') return b.rating - a.rating;
     if (sortBy === 'price') return a.hourlyRate - b.hourlyRate;
     if (sortBy === 'experience') return b.experience - a.experience;
@@ -42,11 +59,17 @@ export const CustomerWorkers: React.FC = () => {
           />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {sortedWorkers.map((worker) => (
-            <WorkerCard key={worker.id} worker={worker} />
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-gray-600">Loading workers...</p>
+        ) : sortedWorkers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sortedWorkers.map((worker) => (
+              <WorkerCard key={worker.id} worker={worker} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600">No workers available</p>
+        )}
       </div>
     </div>
   );
