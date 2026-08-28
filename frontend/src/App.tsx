@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { AuthCallback } from './pages/AuthCallback';
 import { CustomerDashboard } from './pages/customer/CustomerDashboard';
 import { CustomerServices } from './pages/customer/CustomerServices';
 import { CustomerWorkers } from './pages/customer/CustomerWorkers';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         
         {/* Customer Routes */}
         <Route path="/customer" element={<CustomerDashboard />} />
