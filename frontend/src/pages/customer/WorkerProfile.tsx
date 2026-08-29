@@ -30,8 +30,8 @@ export const WorkerProfile: React.FC = () => {
           getWorkerById(id),
           getWorkerReviews(id)
         ]);
-        setWorker(workerData.worker || null);
-        setReviews(reviewsData.reviews || []);
+        setWorker(workerData.data || null);
+        setReviews(reviewsData.data || []);
       } catch (error) {
         console.error('Failed to fetch worker data:', error);
       } finally {

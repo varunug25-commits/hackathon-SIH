@@ -26,7 +26,7 @@ export const WorkerJobDetails: React.FC = () => {
       if (!id) return;
       try {
         const data = await getWorkerBookingById(id);
-        setBooking(data.booking || null);
+        setBooking(data.data || null);
       } catch (error) {
         console.error('Failed to fetch booking:', error);
       } finally {

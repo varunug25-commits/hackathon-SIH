@@ -24,9 +24,9 @@ export const CustomerDashboard: React.FC = () => {
           getWorkers(),
           getCustomerBookings()
         ]);
-        setServices(servicesData.services || []);
-        setWorkers(workersData.workers || []);
-        setBookings(bookingsData.bookings || []);
+        setServices(servicesData.data || []);
+        setWorkers(workersData.data || []);
+        setBookings(bookingsData.data || []);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {

@@ -15,7 +15,7 @@ export const CustomerWorkers: React.FC = () => {
     const fetchWorkers = async () => {
       try {
         const data = await getWorkers();
-        setWorkers(data.workers || []);
+        setWorkers(data.data || []);
       } catch (error) {
         console.error('Failed to fetch workers:', error);
       } finally {

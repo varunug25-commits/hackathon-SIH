@@ -30,11 +30,11 @@ export const WorkerDashboard: React.FC = () => {
           getWorkerBookings(),
           getMyWorkerProfile()
         ]);
-        setBookings(bookingsData.bookings || []);
-        if (workerData.worker) {
-          setWorkerRating(workerData.worker.rating || 4.8);
-          setWorkerReviewCount(workerData.worker.reviewCount || 127);
-          setIsAvailable(workerData.worker.available ?? true);
+        setBookings(bookingsData.data || []);
+        if (workerData.data) {
+          setWorkerRating(workerData.data.rating || 4.8);
+          setWorkerReviewCount(workerData.data.review_count || 127);
+          setIsAvailable(workerData.data.is_available ?? true);
         }
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);

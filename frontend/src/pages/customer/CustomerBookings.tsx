@@ -15,7 +15,7 @@ export const CustomerBookings: React.FC = () => {
     const fetchBookings = async () => {
       try {
         const data = await getCustomerBookings();
-        setBookings(data.bookings || []);
+        setBookings(data.data || []);
       } catch (error) {
         console.error('Failed to fetch bookings:', error);
       } finally {

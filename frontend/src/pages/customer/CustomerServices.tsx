@@ -12,7 +12,7 @@ export const CustomerServices: React.FC = () => {
     const fetchServices = async () => {
       try {
         const data = await getServices();
-        setServices(data.services || []);
+        setServices(data.data || []);
       } catch (error) {
         console.error('Failed to fetch services:', error);
       } finally {

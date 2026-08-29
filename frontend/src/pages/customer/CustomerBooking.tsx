@@ -30,11 +30,11 @@ export const CustomerBooking: React.FC = () => {
         const [servicesData] = await Promise.all([
           getServices()
         ]);
-        setServices(servicesData.services || []);
+        setServices(servicesData.data || []);
 
         if (workerId) {
           const workerData = await getWorkerById(workerId);
-          setWorker(workerData.worker || null);
+          setWorker(workerData.data || null);
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);

@@ -18,7 +18,7 @@ export const WorkerJobs: React.FC = () => {
     const fetchBookings = async () => {
       try {
         const data = await getWorkerBookings();
-        setBookings(data.bookings || []);
+        setBookings(data.data || []);
       } catch (error) {
         console.error('Failed to fetch bookings:', error);
       } finally {
