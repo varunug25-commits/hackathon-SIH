@@ -80,7 +80,7 @@ export const CustomerBooking: React.FC = () => {
       const bookingData = {
         worker_id: workerId,
         service_id: selectedService,
-        location_id: 'cc92e2a7-383a-4f2d-9c04-a9f7b39b6968', // Default location from seed
+        location_id: '4d419cbe-87d2-4699-8199-3dbcd1a70878', // Demo customer location from seed
         problem_description: description,
         urgency: urgency as 'low' | 'medium' | 'high',
         scheduled_date: date,

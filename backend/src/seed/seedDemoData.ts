@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { randomUUID } from 'crypto';
 
 dotenv.config();
 
@@ -50,9 +51,52 @@ async function seedDemoData() {
 
     console.log('Found services:', services.map(s => s.name));
 
+    // Helper function to get or create auth user
+    const getOrCreateUser = async (email: string, password: string, metadata: any) => {
+      // Try to get existing user by email
+      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+      if (listError) throw listError;
+
+      const existingUser = users?.find(u => u.email === email);
+      if (existingUser) {
+        console.log(`User already exists: ${email}`);
+        return existingUser.id;
+      }
+
+      // Create new user
+      const { data, error } = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: metadata
+      });
+
+      if (error) throw error;
+      console.log(`Created new user: ${email}`);
+      return data.user.id;
+    };
+
+    // Create or get auth users first (required for profiles foreign key)
+    console.log('Creating/getting auth users...');
+    const [rajeshUserId, sureshUserId] = await Promise.all([
+      getOrCreateUser('rajesh.kumar@demo.com', 'DemoPassword123!', {
+        full_name: 'Rajesh Kumar',
+        phone: '+919876543210',
+        role: 'worker'
+      }),
+      getOrCreateUser('suresh.patel@demo.com', 'DemoPassword123!', {
+        full_name: 'Suresh Patel',
+        phone: '+919876543211',
+        role: 'worker'
+      })
+    ]);
+
+    console.log('Worker user IDs:', rajeshUserId, sureshUserId);
+
     // Create profiles for demo workers
     const profiles = [
       {
+        id: rajeshUserId,
         full_name: 'Rajesh Kumar',
         email: 'rajesh.kumar@demo.com',
         phone: '+919876543210',
@@ -60,6 +104,7 @@ async function seedDemoData() {
         avatar_url: null
       },
       {
+        id: sureshUserId,
         full_name: 'Suresh Patel',
         email: 'suresh.patel@demo.com',
         phone: '+919876543211',
@@ -71,7 +116,7 @@ async function seedDemoData() {
     console.log('Creating profiles...');
     const { data: createdProfiles, error: profilesError } = await supabase
       .from('profiles')
-      .insert(profiles)
+      .upsert(profiles, { onConflict: 'id' })
       .select();
 
     if (profilesError) throw profilesError;
@@ -115,7 +160,7 @@ async function seedDemoData() {
 
     const { data: createdWorkers, error: workersError } = await supabase
       .from('workers')
-      .insert(workers)
+      .upsert(workers, { onConflict: 'profile_id' })
       .select();
 
     if (workersError) throw workersError;
@@ -151,7 +196,7 @@ async function seedDemoData() {
 
     const { data: createdWorkerServices, error: workerServicesError } = await supabase
       .from('worker_services')
-      .insert(workerServices)
+      .upsert(workerServices, { onConflict: 'worker_id,service_id' })
       .select();
 
     if (workerServicesError) throw workerServicesError;
@@ -171,20 +216,31 @@ async function seedDemoData() {
       .from('worker_availability')
       .insert(availabilitySlots);
 
-    if (availabilityError) throw availabilityError;
-    console.log('Created worker availability slots');
+    if (availabilityError) {
+      console.log('Worker availability may already exist, continuing...');
+    } else {
+      console.log('Created worker availability slots');
+    }
 
     // Create demo customer profile for bookings
+    console.log('Creating/getting demo customer auth user...');
+    const customerUserId = await getOrCreateUser('customer@demo.com', 'DemoPassword123!', {
+      full_name: 'Demo Customer',
+      phone: '+919876543212',
+      role: 'customer'
+    });
+
     console.log('Creating demo customer profile...');
     const { data: customerProfile, error: customerError } = await supabase
       .from('profiles')
-      .insert({
+      .upsert({
+        id: customerUserId,
         full_name: 'Demo Customer',
         email: 'customer@demo.com',
         phone: '+919876543212',
         role: 'customer',
         avatar_url: null
-      })
+      }, { onConflict: 'id' })
       .select()
       .single();
 
@@ -196,9 +252,40 @@ async function seedDemoData() {
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
+
+    // Create a default location for bookings (associated with customer profile)
+    const { data: existingLocations, error: locationError } = await supabase
+      .from('locations')
+      .select('*')
+      .eq('profile_id', customerUserId)
+      .limit(1);
+
+    let locationId;
+    if (existingLocations && existingLocations.length > 0) {
+      locationId = existingLocations[0].id;
+      console.log('Using existing customer location:', locationId);
+    } else {
+      const { data: newLocation, error: insertError } = await supabase
+        .from('locations')
+        .insert({
+          profile_id: customerUserId,
+          address: 'Andheri East, Mumbai',
+          city: 'Mumbai',
+          state: 'Maharashtra',
+          pincode: '400069',
+          latitude: 19.1156,
+          longitude: 72.8642
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+      locationId = newLocation.id;
+      console.log('Created new customer location:', locationId);
+    }
 
     const bookings = [
       {
@@ -210,8 +297,8 @@ async function seedDemoData() {
         urgency: 'medium',
         scheduled_date: tomorrow.toISOString().split('T')[0],
         scheduled_time: '10:00',
-        location: 'Andheri East, Mumbai',
-        estimated_price: 700
+        estimated_price: 700,
+        location_id: locationId
       },
       {
         customer_id: customerProfile.id,
@@ -222,8 +309,8 @@ async function seedDemoData() {
         urgency: 'high',
         scheduled_date: tomorrow.toISOString().split('T')[0],
         scheduled_time: '14:00',
-        location: 'Bandra West, Mumbai',
-        estimated_price: 800
+        estimated_price: 800,
+        location_id: locationId
       },
       {
         customer_id: customerProfile.id,
@@ -234,8 +321,8 @@ async function seedDemoData() {
         urgency: 'low',
         scheduled_date: yesterday.toISOString().split('T')[0],
         scheduled_time: '11:00',
-        location: 'Andheri East, Mumbai',
-        estimated_price: 350
+        estimated_price: 350,
+        location_id: locationId
       }
     ];
 
