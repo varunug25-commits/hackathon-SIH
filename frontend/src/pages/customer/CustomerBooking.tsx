@@ -35,7 +35,13 @@ export const CustomerBooking: React.FC = () => {
 
         if (workerId) {
           const workerData = await getWorkerById(workerId);
-          setWorker(workerData.data || null);
+          const worker = workerData.data || null;
+          setWorker(worker);
+
+          // Auto-select the worker's primary service
+          if (worker?.services && worker.services.length > 0) {
+            setSelectedService(worker.services[0].service_id);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
