@@ -48,7 +48,7 @@ export const WorkerDashboard: React.FC = () => {
   const todayJobs = bookings.filter(b => b.status === 'accepted' || b.status === 'in_progress');
   const pendingRequests = bookings.filter(b => b.status === 'pending');
   const completedJobs = bookings.filter(b => b.status === 'completed');
-  const totalEarnings = completedJobs.reduce((sum, b) => sum + b.estimatedPrice, 0);
+  const totalEarnings = completedJobs.reduce((sum, b) => sum + (b.estimated_price || b.estimatedPrice || 0), 0);
 
   if (loading) {
     return (
@@ -231,7 +231,7 @@ export const WorkerDashboard: React.FC = () => {
                     <div className="text-right">
                       <p className="font-bold text-blue-600">₹{booking.estimatedPrice}</p>
                       <p className="text-sm text-gray-500">
-                        {new Date(booking.scheduledAt).toLocaleTimeString('en-IN', {
+                        {new Date(booking.scheduled_date || booking.scheduledAt || '').toLocaleTimeString('en-IN', {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}

@@ -80,7 +80,7 @@ export const WorkerJobs: React.FC = () => {
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        <span>{new Date(booking.scheduledAt).toLocaleDateString('en-IN', {
+                        <span>{new Date(booking.scheduled_date || booking.scheduledAt || '').toLocaleDateString('en-IN', {
                           day: 'numeric',
                           month: 'short',
                           year: 'numeric'
@@ -88,7 +88,7 @@ export const WorkerJobs: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
-                        <span>{new Date(booking.scheduledAt).toLocaleTimeString('en-IN', {
+                        <span>{new Date(booking.scheduled_date || booking.scheduledAt || '').toLocaleTimeString('en-IN', {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}</span>

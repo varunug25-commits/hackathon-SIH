@@ -109,11 +109,11 @@ export const WorkerJobDetails: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Urgency</p>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    booking.urgency === 'high' ? 'bg-red-100 text-red-800' :
-                    booking.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                    (booking.urgency || 'medium') === 'high' ? 'bg-red-100 text-red-800' :
+                    (booking.urgency || 'medium') === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                     'bg-green-100 text-green-800'
                   }`}>
-                    {booking.urgency.charAt(0).toUpperCase() + booking.urgency.slice(1)}
+                    {(booking.urgency || 'medium').charAt(0).toUpperCase() + (booking.urgency || 'medium').slice(1)}
                   </span>
                 </div>
               </div>
@@ -127,7 +127,7 @@ export const WorkerJobDetails: React.FC = () => {
                   <Calendar className="w-5 h-5 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-600">Date</p>
-                    <p className="font-medium">{new Date(booking.scheduledAt).toLocaleDateString('en-IN', {
+                    <p className="font-medium">{new Date(booking.scheduled_date || booking.scheduledAt || '').toLocaleDateString('en-IN', {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric'
@@ -138,7 +138,7 @@ export const WorkerJobDetails: React.FC = () => {
                   <Clock className="w-5 h-5 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-600">Time</p>
-                    <p className="font-medium">{new Date(booking.scheduledAt).toLocaleTimeString('en-IN', {
+                    <p className="font-medium">{new Date(booking.scheduled_date || booking.scheduledAt || '').toLocaleTimeString('en-IN', {
                       hour: '2-digit',
                       minute: '2-digit'
                     })}</p>

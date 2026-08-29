@@ -61,19 +61,31 @@ export type BookingStatus = 'pending' | 'accepted' | 'in_progress' | 'completed'
 
 export interface Booking {
   id: string;
-  customerId: string;
+  // Backend API fields
+  customer_id?: string;
+  worker_id?: string;
+  service_id?: string;
+  location_id?: string;
+  problem_description?: string;
+  urgency?: 'low' | 'medium' | 'high';
+  scheduled_date?: string;
+  scheduled_time?: string;
+  estimated_price?: number;
+  status: BookingStatus;
+  created_at?: string;
+  updated_at?: string;
+  // Legacy fields for compatibility with mock data
+  customerId?: string;
   workerId?: string;
-  serviceId: string;
-  serviceName: string;
-  description: string;
-  location: string;
+  serviceId?: string;
+  serviceName?: string;
+  description?: string;
+  location?: string;
   latitude?: number;
   longitude?: number;
-  scheduledAt: string;
-  estimatedPrice: number;
-  status: BookingStatus;
-  urgency: 'low' | 'medium' | 'high';
-  createdAt: string;
+  scheduledAt?: string;
+  estimatedPrice?: number;
+  createdAt?: string;
 }
 
 export interface Review {

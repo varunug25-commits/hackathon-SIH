@@ -24,7 +24,7 @@ export const WorkerEarnings: React.FC = () => {
   }, []);
 
   const completedBookings = bookings.filter(b => b.status === 'completed');
-  const totalEarnings = completedBookings.reduce((sum, b) => sum + b.estimatedPrice, 0);
+  const totalEarnings = completedBookings.reduce((sum, b) => sum + (b.estimated_price || b.estimatedPrice || 0), 0);
   const thisMonthEarnings = totalEarnings * 0.7;
 
   if (loading) {
@@ -94,7 +94,7 @@ export const WorkerEarnings: React.FC = () => {
                   <div>
                     <p className="font-medium">{booking.serviceName}</p>
                     <p className="text-sm text-gray-500">
-                      {new Date(booking.scheduledAt).toLocaleDateString('en-IN', {
+                      {new Date(booking.scheduled_date || booking.scheduledAt || '').toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'short'
                       })}

@@ -5,7 +5,7 @@ import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Textarea } from '../../components/Textarea';
 import { Select } from '../../components/Select';
-import { getWorkerById, getServices } from '../../services';
+import { getWorkerById, getServices, createBooking } from '../../services';
 import type { Worker, Service } from '../../types';
 import { Calendar, Clock, MapPin, IndianRupee } from 'lucide-react';
 
@@ -23,6 +23,7 @@ export const CustomerBooking: React.FC = () => {
   const [worker, setWorker] = useState<Worker | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,9 +58,38 @@ export const CustomerBooking: React.FC = () => {
   const workerHourlyRate = worker ? (worker.services?.[0]?.hourly_rate || worker.hourlyRate || 0) : 0;
   const estimatedPrice = workerHourlyRate * 2;
   
-  const handleBooking = (e: React.FormEvent) => {
+  const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/customer/booking-confirmation');
+
+    if (!workerId || !selectedService) {
+      alert('Please select a service and worker');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      // For now, use a default location_id since we don't have location selection
+      // In production, this should come from a location selector or geocoding
+      const bookingData = {
+        worker_id: workerId,
+        service_id: selectedService,
+        location_id: 'cc92e2a7-383a-4f2d-9c04-a9f7b39b6968', // Default location from seed
+        problem_description: description,
+        urgency: urgency as 'low' | 'medium' | 'high',
+        scheduled_date: date,
+        scheduled_time: time,
+        estimated_price: estimatedPrice
+      };
+
+      await createBooking(bookingData);
+      navigate('/customer/booking-confirmation');
+    } catch (error) {
+      console.error('Failed to create booking:', error);
+      alert('Failed to create booking. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
   
   if (loading) {
@@ -158,8 +188,8 @@ export const CustomerBooking: React.FC = () => {
                 />
               </div>
               
-              <Button type="submit" size="lg" className="w-full">
-                Confirm Booking
+              <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+                {submitting ? 'Creating Booking...' : 'Confirm Booking'}
               </Button>
             </form>
           </div>
