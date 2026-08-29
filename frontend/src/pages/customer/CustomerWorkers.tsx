@@ -26,9 +26,9 @@ export const CustomerWorkers: React.FC = () => {
   }, []);
 
   const sortedWorkers = [...workers].sort((a, b) => {
-    if (sortBy === 'rating') return b.rating - a.rating;
-    if (sortBy === 'price') return a.hourlyRate - b.hourlyRate;
-    if (sortBy === 'experience') return b.experience - a.experience;
+    if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+    if (sortBy === 'price') return (a.hourlyRate || a.services?.[0]?.hourly_rate || 0) - (b.hourlyRate || b.services?.[0]?.hourly_rate || 0);
+    if (sortBy === 'experience') return (b.experience || b.experience_years || 0) - (a.experience || a.experience_years || 0);
     return 0;
   });
   

@@ -93,7 +93,7 @@ export const WorkerProfile: React.FC = () => {
                       <ShieldCheck className="w-5 h-5 text-green-600" />
                     )}
                   </div>
-                  <p className="text-gray-600 capitalize">{worker.skills.join(', ')}</p>
+                  <p className="text-gray-600 capitalize">{(worker.skills || worker.services?.map(s => s.name) || []).join(', ')}</p>
                   <div className="flex items-center gap-1 mt-2 text-yellow-600">
                     <Star className="w-5 h-5 fill-current" />
                     <span className="font-semibold">{worker.rating}</span>
@@ -136,8 +136,8 @@ export const WorkerProfile: React.FC = () => {
               <div className="border-t pt-6">
                 <h3 className="font-semibold mb-3">Skills</h3>
                 <div className="flex flex-wrap gap-2">
-                  {worker.skills.map((skill, index) => (
-                    <span 
+                  {(worker.skills || worker.services?.map(s => s.name) || []).map((skill, index) => (
+                    <span
                       key={index}
                       className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm capitalize"
                     >

@@ -9,17 +9,35 @@ export interface User {
   avatar?: string;
 }
 
+export interface WorkerService {
+  service_id: string;
+  name: string;
+  icon_name: string;
+  hourly_rate: number;
+  base_rate: number | null;
+}
+
 export interface Worker extends User {
   role: 'worker';
-  skills: string[];
-  experience: number; // years
-  location: string;
-  rating: number;
-  reviewCount: number;
-  hourlyRate: number; // INR
-  verified: boolean;
-  available: boolean;
-  completedJobs: number;
+  // Backend API fields
+  full_name?: string;
+  bio?: string;
+  experience_years?: number; // years
+  verification_status?: 'verified' | 'pending' | 'rejected';
+  rating?: number;
+  total_reviews?: number;
+  completed_jobs?: number;
+  is_available?: boolean;
+  services?: WorkerService[];
+  // Legacy fields for compatibility with mock data
+  skills?: string[];
+  experience?: number;
+  location?: string;
+  reviewCount?: number;
+  hourlyRate?: number;
+  verified?: boolean;
+  available?: boolean;
+  completedJobs?: number;
   latitude?: number;
   longitude?: number;
 }

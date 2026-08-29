@@ -52,7 +52,7 @@ export const CustomerBooking: React.FC = () => {
     setDate(today);
   }, []);
   
-  const estimatedPrice = worker ? worker.hourlyRate * 2 : 0;
+  const estimatedPrice = worker ? (worker.hourlyRate || worker.services?.[0]?.hourly_rate || 0) * 2 : 0;
   
   const handleBooking = (e: React.FormEvent) => {
     e.preventDefault();
