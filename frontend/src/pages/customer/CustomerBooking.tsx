@@ -74,25 +74,28 @@ export const CustomerBooking: React.FC = () => {
 
     setSubmitting(true);
 
-    try {
-      // For now, use a default location_id since we don't have location selection
-      // In production, this should come from a location selector or geocoding
-      const bookingData = {
-        worker_id: workerId,
-        service_id: selectedService,
-        location_id: '4d419cbe-87d2-4699-8199-3dbcd1a70878', // Demo customer location from seed
-        problem_description: description,
-        urgency: urgency as 'low' | 'medium' | 'high',
-        scheduled_date: date,
-        scheduled_time: time,
-        estimated_price: estimatedPrice
-      };
+    // For now, use a default location_id since we don't have location selection
+    // In production, this should come from a location selector or geocoding
+    const bookingData = {
+      worker_id: workerId,
+      service_id: selectedService,
+      location_id: '4d419cbe-87d2-4699-8199-3dbcd1a70878', // Demo customer location from seed
+      problem_description: description,
+      urgency: urgency as 'low' | 'medium' | 'high',
+      scheduled_date: date,
+      scheduled_time: time,
+      estimated_price: estimatedPrice
+    };
 
+    try {
       await createBooking(bookingData);
       navigate('/customer/booking-confirmation');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create booking:', error);
-      alert('Failed to create booking. Please try again.');
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Request payload:', bookingData);
+      alert(`Failed to create booking: ${error.response?.data?.message || error.message || 'Please try again.'}`);
     } finally {
       setSubmitting(false);
     }
