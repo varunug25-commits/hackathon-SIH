@@ -46,13 +46,16 @@ export const CustomerBooking: React.FC = () => {
   }, [workerId]);
 
   const service = services.find(s => s.id === selectedService);
-  
+
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setDate(today);
   }, []);
-  
-  const estimatedPrice = worker ? (worker.hourlyRate || worker.services?.[0]?.hourly_rate || 0) * 2 : 0;
+
+  // Map backend fields to component fields with fallbacks
+  const workerName = worker ? (worker.full_name || worker.name || 'Unknown') : null;
+  const workerHourlyRate = worker ? (worker.services?.[0]?.hourly_rate || worker.hourlyRate || 0) : 0;
+  const estimatedPrice = workerHourlyRate * 2;
   
   const handleBooking = (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,7 +171,7 @@ export const CustomerBooking: React.FC = () => {
               {worker && (
                 <div className="mb-4 pb-4 border-b">
                   <p className="text-sm text-gray-600 mb-1">Worker</p>
-                  <p className="font-semibold">{worker.name}</p>
+                  <p className="font-semibold">{workerName}</p>
                 </div>
               )}
               

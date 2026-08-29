@@ -62,11 +62,23 @@ export const WorkerProfile: React.FC = () => {
       </div>
     );
   }
-  
+
+  // Map backend fields to component fields with fallbacks
+  const name = worker.full_name || worker.name || 'Unknown';
+  const skills = worker.skills || (worker.services?.map(s => s.name) || []);
+  const experience = worker.experience_years || worker.experience || 0;
+  const location = worker.location || 'Location not specified';
+  const rating = worker.rating || 0;
+  const reviewCount = worker.total_reviews || worker.reviewCount || 0;
+  const hourlyRate = worker.services?.[0]?.hourly_rate || worker.hourlyRate || 0;
+  const verified = worker.verification_status === 'verified' || worker.verified || false;
+  const available = worker.is_available !== undefined ? worker.is_available : (worker.available !== undefined ? worker.available : true);
+  const completedJobs = worker.completed_jobs || worker.completedJobs || 0;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar userRole="customer" userName="Rahul Sharma" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <button
@@ -76,67 +88,67 @@ export const WorkerProfile: React.FC = () => {
             ← Back to Workers
           </button>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Card className="p-6 mb-6">
               <div className="flex items-start gap-4 mb-6">
                 <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
                   <span className="text-2xl font-bold text-blue-600">
-                    {worker.name.split(' ').map(n => n[0]).join('')}
+                    {name.split(' ').map(n => n[0]).join('')}
                   </span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-2xl font-bold">{worker.name}</h1>
-                    {worker.verified && (
+                    <h1 className="text-2xl font-bold">{name}</h1>
+                    {verified && (
                       <ShieldCheck className="w-5 h-5 text-green-600" />
                     )}
                   </div>
-                  <p className="text-gray-600 capitalize">{(worker.skills || worker.services?.map(s => s.name) || []).join(', ')}</p>
+                  <p className="text-gray-600 capitalize">{skills.join(', ')}</p>
                   <div className="flex items-center gap-1 mt-2 text-yellow-600">
                     <Star className="w-5 h-5 fill-current" />
-                    <span className="font-semibold">{worker.rating}</span>
-                    <span className="text-gray-500">({worker.reviewCount} reviews)</span>
+                    <span className="font-semibold">{rating}</span>
+                    <span className="text-gray-500">({reviewCount} reviews)</span>
                   </div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div>
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <Clock className="w-4 h-4" />
                     <span className="text-sm">Experience</span>
                   </div>
-                  <p className="font-semibold">{worker.experience} years</p>
+                  <p className="font-semibold">{experience} years</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-sm">Jobs Done</span>
                   </div>
-                  <p className="font-semibold">{worker.completedJobs}</p>
+                  <p className="font-semibold">{completedJobs}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <MapPin className="w-4 h-4" />
                     <span className="text-sm">Location</span>
                   </div>
-                  <p className="font-semibold">{worker.location}</p>
+                  <p className="font-semibold">{location}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-gray-600 mb-1">
                     <IndianRupee className="w-4 h-4" />
                     <span className="text-sm">Rate</span>
                   </div>
-                  <p className="font-semibold">₹{worker.hourlyRate}/hr</p>
+                  <p className="font-semibold">₹{hourlyRate}/hr</p>
                 </div>
               </div>
-              
+
               <div className="border-t pt-6">
                 <h3 className="font-semibold mb-3">Skills</h3>
                 <div className="flex flex-wrap gap-2">
-                  {(worker.skills || worker.services?.map(s => s.name) || []).map((skill, index) => (
+                  {skills.map((skill, index) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm capitalize"
@@ -147,7 +159,7 @@ export const WorkerProfile: React.FC = () => {
                 </div>
               </div>
             </Card>
-            
+
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Reviews</h2>
               {reviews.length > 0 ? (
@@ -172,31 +184,31 @@ export const WorkerProfile: React.FC = () => {
               )}
             </Card>
           </div>
-          
+
           <div className="lg:col-span-1">
             <Card className="p-6 sticky top-4">
               <div className="mb-6">
                 <div className="text-3xl font-bold text-blue-600 mb-2">
-                  ₹{worker.hourlyRate}
+                  ₹{hourlyRate}
                 </div>
                 <p className="text-gray-600">per hour</p>
               </div>
-              
+
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-green-600 mb-2">
                   <CheckCircle className="w-5 h-5" />
-                  <span className="font-medium">{worker.available ? 'Available Now' : 'Currently Busy'}</span>
+                  <span className="font-medium">{available ? 'Available Now' : 'Currently Busy'}</span>
                 </div>
               </div>
-              
+
               <Button
                 className="w-full mb-3"
-                disabled={!worker.available}
+                disabled={!available}
                 onClick={() => navigate(`/customer/booking?workerId=${worker.id}`)}
               >
-                {worker.available ? 'Book Now' : 'Currently Unavailable'}
+                {available ? 'Book Now' : 'Currently Unavailable'}
               </Button>
-              
+
               <Button
                 variant="outline"
                 className="w-full"
