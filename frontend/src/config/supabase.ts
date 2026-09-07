@@ -1,13 +1,2 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set in environment variables. ' +
-    'Please add them to your .env file or Vercel environment variables.'
-  );
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Supabase integration removed - will be replaced with custom backend
+export const supabase = null;

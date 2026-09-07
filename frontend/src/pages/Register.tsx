@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
-import { register } from '../services';
+import { register } from '../services/auth';
 import type { UserRole } from '../types';
 
 export const Register: React.FC = () => {
@@ -36,31 +36,36 @@ export const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      const data = role === 'customer'
+      const data: {
+        name: string;
+        email: string;
+        password: string;
+        phone?: string;
+        role: 'CUSTOMER' | 'WORKER';
+      } = role === 'customer'
         ? {
-            full_name: customerData.name,
+            name: customerData.name,
             email: customerData.email,
             phone: customerData.phone,
             password: customerData.password,
-            role: role
+            role: 'CUSTOMER'
           }
         : {
-            full_name: workerData.name,
+            name: workerData.name,
             email: workerData.email,
             phone: workerData.phone,
             password: workerData.password,
-            role: role
+            role: 'WORKER'
           };
 
       const response = await register(data);
-      localStorage.setItem('auth_token', response.access_token);
-      localStorage.setItem('user_role', role);
+      localStorage.setItem('auth_token', response.token);
+      localStorage.setItem('user_role', response.user.role.toLowerCase());
+      localStorage.setItem('user_id', response.user.id);
+      localStorage.setItem('user_name', response.user.name);
 
-      if (role === 'customer') {
-        navigate('/customer');
-      } else {
-        navigate('/worker');
-      }
+      // Navigate based on role
+      navigate(response.user.role === 'CUSTOMER' ? '/customer' : '/worker');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {

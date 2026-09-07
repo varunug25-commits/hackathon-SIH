@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
+import { WorkerLogin } from './pages/WorkerLogin';
+import { WorkerRegister } from './pages/WorkerRegister';
 import { Register } from './pages/Register';
-import { AuthCallback } from './pages/AuthCallback';
 import { CustomerDashboard } from './pages/customer/CustomerDashboard';
 import { CustomerServices } from './pages/customer/CustomerServices';
 import { CustomerWorkers } from './pages/customer/CustomerWorkers';
@@ -13,6 +14,7 @@ import { CustomerBookings } from './pages/customer/CustomerBookings';
 import { CustomerProfile } from './pages/customer/CustomerProfile';
 import { WorkerDashboard } from './pages/worker/WorkerDashboard';
 import { WorkerJobs } from './pages/worker/WorkerJobs';
+import { WorkerMyJobs } from './pages/worker/WorkerMyJobs';
 import { WorkerJobDetails } from './pages/worker/WorkerJobDetails';
 import { WorkerEarnings } from './pages/worker/WorkerEarnings';
 import { WorkerProfile as WorkerProfilePage } from './pages/worker/WorkerProfile';
@@ -24,8 +26,9 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/worker-login" element={<WorkerLogin />} />
+        <Route path="/worker-register" element={<WorkerRegister />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
         
         {/* Customer Routes */}
         <Route path="/customer" element={<CustomerDashboard />} />
@@ -40,9 +43,13 @@ function App() {
         {/* Worker Routes */}
         <Route path="/worker" element={<WorkerDashboard />} />
         <Route path="/worker/jobs" element={<WorkerJobs />} />
+        <Route path="/worker/my-jobs" element={<WorkerMyJobs />} />
         <Route path="/worker/jobs/:id" element={<WorkerJobDetails />} />
         <Route path="/worker/earnings" element={<WorkerEarnings />} />
         <Route path="/worker/profile" element={<WorkerProfilePage />} />
+        
+        {/* Debug route */}
+        <Route path="/test" element={<div className="p-8">Test page works!</div>} />
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

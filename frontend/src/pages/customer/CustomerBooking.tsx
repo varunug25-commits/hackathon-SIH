@@ -77,14 +77,9 @@ export const CustomerBooking: React.FC = () => {
     // For now, use a default location_id since we don't have location selection
     // In production, this should come from a location selector or geocoding
     const bookingData = {
-      worker_id: workerId,
-      service_id: selectedService,
-      location_id: '4d419cbe-87d2-4699-8199-3dbcd1a70878', // Demo customer location from seed
-      problem_description: description,
-      urgency: urgency as 'low' | 'medium' | 'high',
-      scheduled_date: date,
-      scheduled_time: time,
-      estimated_price: estimatedPrice
+      workerId: workerId,
+      serviceId: selectedService,
+      bookingDate: `${date}T${time}:00.000Z`
     };
 
     try {

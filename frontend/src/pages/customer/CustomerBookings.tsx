@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { BookingCard } from '../../components/BookingCard';
-import { getCustomerBookings } from '../../services';
+import { getBookings } from '../../services/bookings';
 import type { BookingStatus, Booking } from '../../types';
 
 export const CustomerBookings: React.FC = () => {
@@ -14,7 +14,7 @@ export const CustomerBookings: React.FC = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const data = await getCustomerBookings();
+        const data = await getBookings();
         setBookings(data.data || []);
       } catch (error) {
         console.error('Failed to fetch bookings:', error);

@@ -5,7 +5,9 @@ import { Button } from '../../components/Button';
 import { ServiceCard } from '../../components/ServiceCard';
 import { WorkerCard } from '../../components/WorkerCard';
 import { BookingCard } from '../../components/BookingCard';
-import { getServices, getWorkers, getCustomerBookings } from '../../services';
+import { getServices } from '../../services/services';
+import { getWorkers } from '../../services/workers';
+import { getBookings } from '../../services/bookings';
 import type { Service, Worker, Booking } from '../../types';
 import { Search, Plus } from 'lucide-react';
 
@@ -22,7 +24,7 @@ export const CustomerDashboard: React.FC = () => {
         const [servicesData, workersData, bookingsData] = await Promise.all([
           getServices(),
           getWorkers(),
-          getCustomerBookings()
+          getBookings()
         ]);
         setServices(servicesData.data || []);
         setWorkers(workersData.data || []);
