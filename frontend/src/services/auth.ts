@@ -1,32 +1,47 @@
 import apiClient from './api';
 
 export const register = async (data: {
-  name: string;
   email: string;
   password: string;
-  phone?: string;
-  role?: 'CUSTOMER' | 'WORKER';
+  full_name: string;
+  role: 'customer' | 'worker';
 }) => {
-  const response = await apiClient.post('/auth/register', data);
-  return response.data;
+  // Mock registration - returns mock token and user data
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  return {
+    access_token: 'mock_token_' + Date.now(),
+    user: {
+      id: 'mock_user_' + Date.now(),
+      email: data.email,
+      role: data.role,
+      name: data.full_name
+    }
+  };
 };
 
 export const login = async (data: {
   email: string;
   password: string;
 }) => {
-  const response = await apiClient.post('/auth/login', data);
+  // Mock login - returns mock token and user data
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  return {
+    access_token: 'mock_token_' + Date.now(),
+    user: {
+      id: 'mock_user_' + Date.now(),
+      email: data.email,
+      role: 'customer', // Default to customer for demo
+      name: 'Demo User'
+    }
+  };
+};
+
+export const logout = async () => {
+  const response = await apiClient.post('/auth/logout');
   return response.data;
 };
 
-export const logout = () => {
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('user_role');
-  localStorage.removeItem('user_id');
-  localStorage.removeItem('user_name');
-};
-
 export const getMe = async () => {
-  const response = await apiClient.get('/protected');
+  const response = await apiClient.get('/auth/me');
   return response.data;
 };

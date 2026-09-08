@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
@@ -20,8 +20,6 @@ import {
   Award,
   Bell
 } from 'lucide-react';
-import { getWorkerBookings } from '../../services/bookings';
-import { updateWorkerAvailability } from '../../services/workers';
 
 // Worker types with icons
 const workerTypes = [
@@ -31,67 +29,115 @@ const workerTypes = [
   { id: 'cleaner', name: 'Cleaner', icon: Star, color: 'green' }
 ];
 
+// Mock data for demonstration
+const mockBookings = [
+  {
+    id: '1',
+    serviceName: 'Electrical Wiring Repair',
+    description: 'Fix faulty wiring in living room and kitchen',
+    customer_id: 'cust_001',
+    customerName: 'Rahul Sharma',
+    location: 'Mumbai, Andheri West',
+    distance: '2.5 km',
+    scheduled_date: '2026-09-03T10:00:00',
+    estimated_price: 850,
+    estimatedPrice: 850,
+    status: 'pending' as const,
+    urgency: 'high'
+  },
+  {
+    id: '2',
+    serviceName: 'Fan Installation',
+    description: 'Install 3 ceiling fans in bedrooms',
+    customer_id: 'cust_002',
+    customerName: 'Priya Patel',
+    location: 'Mumbai, Bandra East',
+    distance: '4.2 km',
+    scheduled_date: '2026-09-03T14:00:00',
+    estimated_price: 600,
+    estimatedPrice: 600,
+    status: 'accepted' as const,
+    urgency: 'medium'
+  },
+  {
+    id: '3',
+    serviceName: 'Switchboard Replacement',
+    description: 'Replace old switchboard with new one',
+    customer_id: 'cust_003',
+    customerName: 'Amit Kumar',
+    location: 'Mumbai, Dadar',
+    distance: '3.8 km',
+    scheduled_date: '2026-09-03T16:00:00',
+    estimated_price: 450,
+    estimatedPrice: 450,
+    status: 'in_progress' as const,
+    urgency: 'low'
+  },
+  {
+    id: '4',
+    serviceName: 'Meter Box Repair',
+    description: 'Fix damaged meter box and connections',
+    customer_id: 'cust_004',
+    customerName: 'Sneha Reddy',
+    location: 'Mumbai, Thane',
+    distance: '12.3 km',
+    scheduled_date: '2026-09-02T09:00:00',
+    estimated_price: 700,
+    estimatedPrice: 700,
+    status: 'completed' as const,
+    urgency: 'medium'
+  }
+];
+
+const mockRecommendedJobs = [
+  {
+    id: '5',
+    serviceName: 'AC Repair',
+    description: 'Air conditioner not cooling properly',
+    customer_id: 'cust_005',
+    customerName: 'Vikram Singh',
+    location: 'Mumbai, Goregaon',
+    distance: '6.1 km',
+    scheduled_date: '2026-09-04T11:00:00',
+    estimated_price: 1200,
+    estimatedPrice: 1200,
+    status: 'pending' as const,
+    urgency: 'high',
+    matchScore: 95
+  },
+  {
+    id: '6',
+    serviceName: 'Geyser Installation',
+    description: 'Install new electric geyser in bathroom',
+    customer_id: 'cust_006',
+    customerName: 'Anjali Mehta',
+    location: 'Mumbai, Malad',
+    distance: '7.5 km',
+    scheduled_date: '2026-09-04T15:00:00',
+    estimated_price: 950,
+    estimatedPrice: 950,
+    status: 'pending' as const,
+    urgency: 'medium',
+    matchScore: 88
+  }
+];
+
 export const WorkerDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [isAvailable, setIsAvailable] = useState(true);
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [bookings] = useState(mockBookings);
+  const [recommendedJobs] = useState(mockRecommendedJobs);
   const workerRating = 4.8;
   const workerReviewCount = 127;
   const workerType = workerTypes[0]; // Electrician
-  const userId = localStorage.getItem('user_id');
 
-  const WorkerIcon = workerType.icon;
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const bookingsData = await getWorkerBookings();
-        const bookingsList = Array.isArray(bookingsData) ? bookingsData : (bookingsData.data || []);
-        setBookings(bookingsList);
-        
-        // Filter bookings for recommended jobs (pending and nearby)
-        const pendingJobs = bookingsList.filter((b: any) => b.status === 'PENDING');
-        setRecommendedJobs(pendingJobs.slice(0, 2));
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-        setBookings([]);
-        setRecommendedJobs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
-
-  const handleAvailabilityToggle = async () => {
-    try {
-      const newAvailability = !isAvailable;
-      await updateWorkerAvailability(userId || '', newAvailability);
-      setIsAvailable(newAvailability);
-    } catch (error) {
-      console.error('Failed to update availability:', error);
-    }
-  };
-
-  const todayJobs = bookings.filter(b => b.status === 'ACCEPTED' || b.status === 'IN_PROGRESS');
-  const pendingRequests = bookings.filter(b => b.status === 'PENDING');
-  const completedJobs = bookings.filter(b => b.status === 'COMPLETED');
+  const todayJobs = bookings.filter(b => b.status === 'accepted' || b.status === 'in_progress');
+  const pendingRequests = bookings.filter(b => b.status === 'pending');
+  const completedJobs = bookings.filter(b => b.status === 'completed');
   const totalEarnings = completedJobs.reduce((sum, b) => sum + (b.estimated_price || 0), 0);
   const thisMonthEarnings = Math.round(totalEarnings * 0.7);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <Navbar userRole="worker" userName={localStorage.getItem('user_name') || 'Worker'} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <p className="text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  const WorkerIcon = workerType.icon;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -117,7 +163,7 @@ export const WorkerDashboard: React.FC = () => {
             
             <div className="flex items-center gap-3">
               <button
-                onClick={handleAvailabilityToggle}
+                onClick={() => setIsAvailable(!isAvailable)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                   isAvailable 
                     ? 'bg-green-100 text-green-700 hover:bg-green-200' 

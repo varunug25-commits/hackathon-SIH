@@ -4,7 +4,6 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
 import { User, Lock, ArrowRight, CheckCircle, Wrench } from 'lucide-react';
-import { login } from '../services/auth';
 
 export const WorkerLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -19,22 +18,17 @@ export const WorkerLogin: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await login({ email, password });
+      // Simulate login - mock authentication
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Store auth data from backend
-      localStorage.setItem('auth_token', response.token);
-      localStorage.setItem('user_role', response.user.role.toLowerCase());
-      localStorage.setItem('user_id', response.user.id);
-      localStorage.setItem('user_name', response.user.name);
+      // Store mock auth data
+      localStorage.setItem('auth_token', 'mock_worker_token');
+      localStorage.setItem('user_role', 'worker');
+      localStorage.setItem('user_email', email);
 
-      // Navigate based on role
-      if (response.user.role === 'WORKER') {
-        navigate('/worker');
-      } else {
-        navigate('/customer');
-      }
+      navigate('/worker');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

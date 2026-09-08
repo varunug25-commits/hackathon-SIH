@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './Button';
 import { LogOut, User, Home, Briefcase, IndianRupee, Users } from 'lucide-react';
-import { logout } from '../services/auth';
 
 interface NavbarProps {
   userRole?: 'customer' | 'worker';
@@ -14,7 +13,6 @@ export const Navbar: React.FC<NavbarProps> = ({ userRole, userName }) => {
   const location = useLocation();
   
   const handleLogout = () => {
-    logout();
     navigate('/');
   };
   

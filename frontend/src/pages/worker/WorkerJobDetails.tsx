@@ -4,7 +4,7 @@ import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatusBadge } from '../../components/StatusBadge';
-import { getBookingById } from '../../services/bookings';
+import { getWorkerBookingById } from '../../services';
 import type { Booking } from '../../types';
 import {
   Calendar,
@@ -25,7 +25,7 @@ export const WorkerJobDetails: React.FC = () => {
     const fetchBooking = async () => {
       if (!id) return;
       try {
-        const data = await getBookingById(id);
+        const data = await getWorkerBookingById(id);
         setBooking(data.data || null);
       } catch (error) {
         console.error('Failed to fetch booking:', error);

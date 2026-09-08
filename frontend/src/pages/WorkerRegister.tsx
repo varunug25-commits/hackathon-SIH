@@ -4,8 +4,6 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
 import { User, Mail, Phone, Wrench, MapPin, Lock, CheckCircle, ArrowRight, ArrowLeft, Building2, Star } from 'lucide-react';
-import { register } from '../services/auth';
-import { createWorkerProfile } from '../services/workers';
 
 const workerTypes = [
   { id: 'electrician', name: 'Electrician', icon: '⚡', description: 'Electrical repairs, wiring, installations' },
@@ -83,37 +81,18 @@ export const WorkerRegister: React.FC = () => {
     setLoading(true);
 
     try {
-      // Register user first
-      const userResponse = await register({
-        name: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        phone: formData.phone,
-        role: 'WORKER'
-      });
+      // Simulate registration - mock authentication
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Store mock registration data
+      localStorage.setItem('worker_registration_data', JSON.stringify({
+        ...formData,
+        workerType: selectedWorkerType
+      }));
 
-      // Store auth data
-      localStorage.setItem('auth_token', userResponse.token);
-      localStorage.setItem('user_role', 'worker');
-      localStorage.setItem('user_id', userResponse.user.id);
-      localStorage.setItem('user_name', userResponse.user.name);
-
-      // Create worker profile
-      try {
-        await createWorkerProfile({
-          userId: userResponse.user.id,
-          skills: formData.skills,
-          experience: parseInt(formData.experience),
-          location: formData.location
-        });
-      } catch (profileError) {
-        console.error('Failed to create worker profile:', profileError);
-        // Continue anyway - user is registered
-      }
-
-      navigate('/worker');
+      navigate('/worker-login');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -269,8 +248,6 @@ export const WorkerRegister: React.FC = () => {
                 <p><strong>Name:</strong> {formData.fullName}</p>
                 <p><strong>Email:</strong> {formData.email}</p>
                 <p><strong>Phone:</strong> {formData.phone}</p>
-                <p><strong>Skills:</strong> {formData.skills}</p>
-                <p><strong>Experience:</strong> {formData.experience} years</p>
                 <p><strong>Location:</strong> {formData.location}</p>
               </div>
             </div>

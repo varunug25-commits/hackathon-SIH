@@ -1,47 +1,57 @@
 import apiClient from './api';
 
-// Booking operations matching backend API
+// Customer booking operations
 export const createBooking = async (data: {
-  workerId: string;
-  serviceId: string;
-  bookingDate: string;
+  worker_id: string;
+  service_id: string;
+  location_id: string;
+  problem_description: string;
+  urgency: 'low' | 'medium' | 'high' | 'critical';
+  scheduled_date: string;
+  scheduled_time: string;
+  estimated_price: number;
 }) => {
   const response = await apiClient.post('/bookings', data);
   return response.data;
 };
 
-export const getBookings = async () => {
+export const getCustomerBookings = async () => {
   const response = await apiClient.get('/bookings');
   return response.data;
 };
 
-export const getBookingById = async (id: string) => {
+export const getCustomerBookingById = async (id: string) => {
   const response = await apiClient.get(`/bookings/${id}`);
   return response.data;
 };
 
-export const updateBookingStatus = async (id: string, status: string) => {
-  const response = await apiClient.patch(`/bookings/${id}/status`, { status });
+export const cancelBooking = async (id: string) => {
+  const response = await apiClient.patch(`/bookings/${id}/cancel`);
   return response.data;
 };
 
-// Convenience methods for worker operations
+// Worker booking operations
 export const getWorkerBookings = async () => {
-  return getBookings();
+  const response = await apiClient.get('/bookings/worker/bookings');
+  return response.data;
+};
+
+export const getWorkerBookingById = async (id: string) => {
+  const response = await apiClient.get(`/bookings/worker/bookings/${id}`);
+  return response.data;
 };
 
 export const acceptBooking = async (id: string) => {
-  return updateBookingStatus(id, 'ACCEPTED');
+  const response = await apiClient.patch(`/bookings/worker/bookings/${id}/accept`);
+  return response.data;
 };
 
 export const startBooking = async (id: string) => {
-  return updateBookingStatus(id, 'IN_PROGRESS');
+  const response = await apiClient.patch(`/bookings/worker/bookings/${id}/start`);
+  return response.data;
 };
 
 export const completeBooking = async (id: string) => {
-  return updateBookingStatus(id, 'COMPLETED');
-};
-
-export const cancelBooking = async (id: string) => {
-  return updateBookingStatus(id, 'CANCELLED');
+  const response = await apiClient.patch(`/bookings/worker/bookings/${id}/complete`);
+  return response.data;
 };
