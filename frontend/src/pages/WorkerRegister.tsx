@@ -4,6 +4,7 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
 import { User, Mail, Phone, Wrench, MapPin, Lock, CheckCircle, ArrowRight, ArrowLeft, Building2, Star } from 'lucide-react';
+import { backendApi } from '../services/backendApi';
 
 const workerTypes = [
   { id: 'electrician', name: 'Electrician', icon: '⚡', description: 'Electrical repairs, wiring, installations' },
@@ -81,18 +82,22 @@ export const WorkerRegister: React.FC = () => {
     setLoading(true);
 
     try {
-      // Simulate registration - mock authentication
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Store mock registration data
-      localStorage.setItem('worker_registration_data', JSON.stringify({
-        ...formData,
-        workerType: selectedWorkerType
-      }));
+      // Call backend API
+      const response = await backendApi.register({
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        role: 'worker'
+      });
 
-      navigate('/worker-login');
+      if (response.success) {
+        navigate('/worker-login');
+      } else {
+        setError(response.message || 'Registration failed. Please try again.');
+      }
     } catch (err: any) {
-      setError('Registration failed. Please try again.');
+      setError('Registration failed. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }

@@ -3,32 +3,57 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
-import { User, Lock, ArrowRight, CheckCircle, Wrench } from 'lucide-react';
+import { User, Lock, ArrowRight, CheckCircle, Wrench, Zap, Droplet, Hammer, Broom, Palette, Wrench as WrenchIcon, Sprout, Snowflake } from 'lucide-react';
+import { backendApi } from '../services/backendApi';
+
+const workerTypes = [
+  { id: 'electrician', name: 'Electrician', icon: Zap, description: 'Electrical repairs, wiring' },
+  { id: 'plumber', name: 'Plumber', icon: Droplet, description: 'Pipe repairs, installations' },
+  { id: 'carpenter', name: 'Carpenter', icon: Hammer, description: 'Woodwork, furniture' },
+  { id: 'cleaner', name: 'Cleaner', icon: Broom, description: 'House cleaning' },
+  { id: 'painter', name: 'Painter', icon: Palette, description: 'Painting, wall treatments' },
+  { id: 'mechanic', name: 'Mechanic', icon: WrenchIcon, description: 'Appliance repairs' },
+  { id: 'gardener', name: 'Gardener', icon: Sprout, description: 'Garden maintenance' },
+  { id: 'ac_technician', name: 'AC Technician', icon: Snowflake, description: 'AC repair, installation' }
+];
 
 export const WorkerLogin: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedWorkerType, setSelectedWorkerType] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (!selectedWorkerType) {
+      setError('Please select your profession');
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      // Simulate login - mock authentication
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call backend API
+      const response = await backendApi.login(email, password);
       
-      // Store mock auth data
-      localStorage.setItem('auth_token', 'mock_worker_token');
-      localStorage.setItem('user_role', 'worker');
-      localStorage.setItem('user_email', email);
-
-      navigate('/worker');
+      if (response.success && response.session) {
+        // Store auth data
+        localStorage.setItem('auth_token', response.session.access_token);
+        localStorage.setItem('user_role', 'worker');
+        localStorage.setItem('user_email', email);
+        localStorage.setItem('worker_type', selectedWorkerType);
+        localStorage.setItem('user_id', response.user.id);
+        
+        navigate('/worker');
+      } else {
+        setError(response.message || 'Login failed. Please try again.');
+      }
     } catch (err: any) {
-      setError('Login failed. Please try again.');
+      setError('Login failed. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -42,7 +67,7 @@ export const WorkerLogin: React.FC = () => {
           <div className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-8 text-white h-full flex flex-col justify-center">
             <div className="flex items-center gap-3 mb-6">
               <Wrench className="w-10 h-10" />
-              <span className="text-2xl font-bold">CoopServices</span>
+              <span className="text-2xl font-bold">FixMate</span>
             </div>
             <h2 className="text-3xl font-bold mb-4">Grow Your Business</h2>
             <p className="text-purple-100 mb-6">
@@ -73,6 +98,30 @@ export const WorkerLogin: React.FC = () => {
           </div>
           
           <Card className="p-8">
+            {/* Worker Type Selection */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Select Your Profession</h3>
+              <div className="grid grid-cols-4 gap-2">
+                {workerTypes.map((type) => {
+                  const Icon = type.icon;
+                  return (
+                    <button
+                      key={type.id}
+                      onClick={() => setSelectedWorkerType(type.id)}
+                      className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center ${
+                        selectedWorkerType === type.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5 mb-1" />
+                      <span className="text-xs font-medium">{type.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {error && (
               <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
                 {error}
@@ -112,18 +161,6 @@ export const WorkerLogin: React.FC = () => {
                 )}
               </Button>
             </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-gray-600">
-                Are you a customer?{' '}
-                <button
-                  onClick={() => navigate('/login')}
-                  className="text-blue-600 hover:text-blue-700 font-semibold"
-                >
-                  Login as Customer
-                </button>
-              </p>
-            </div>
 
             <div className="mt-4 text-center">
               <p className="text-gray-600">
